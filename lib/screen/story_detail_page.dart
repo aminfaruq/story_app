@@ -56,27 +56,42 @@ class _StoryDetailPageState extends State<StoryDetailPage> {
     if (story == null) {
       return const Text('Story not found');
     }
-
-    return Column(
-      children: [
-        Expanded(
-          child: Stack(
-            children: [
-              _buildMaps(LatLng(story.lat ?? 0.0, story.lon ?? 0.0)),
-              const Positioned(
-                top: 8.0,
-                left: 8.0,
-                right: 8.0,
-                bottom: 24,
-                child: SizedBox.shrink(),
-              ),
-              _buildBackButton(context),
-            ],
+    if (story.lat != null && story.lon != null) {
+      return Column(
+        children: [
+          Expanded(
+            child: Stack(
+              children: [
+                _buildMaps(LatLng(story.lat ?? 0.0, story.lon ?? 0.0)),
+                const Positioned(
+                  top: 8.0,
+                  left: 8.0,
+                  right: 8.0,
+                  bottom: 24,
+                  child: SizedBox.shrink(),
+                ),
+                _buildBackButton(context),
+              ],
+            ),
           ),
-        ),
-        _buildContent(context, story)
-      ],
-    );
+          _buildContent(context, story)
+        ],
+      );
+    } else {
+      return Stack(
+        children: [
+          const Positioned(
+            top: 8.0,
+            left: 8.0,
+            right: 8.0,
+            bottom: 24,
+            child: SizedBox.shrink(),
+          ),
+          _buildContent(context, story),
+          _buildBackButton(context),
+        ],
+      );
+    }
   }
 
   GoogleMap _buildMaps(LatLng latLng) {
