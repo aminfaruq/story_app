@@ -137,9 +137,9 @@ class _AddStoryPageState extends State<AddStoryPage> {
             borderRadius: BorderRadius.circular(8.0),
           ),
         ),
-        child: const Text(
-          "Input Location",
-          style: TextStyle(
+        child: Text(
+          "Input Location ${(widget.inputLang != const LatLng(0.0, 0.0)) ? "\u2713" : ""}",
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.white,
