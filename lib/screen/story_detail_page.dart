@@ -19,7 +19,6 @@ class _StoryDetailPageState extends State<StoryDetailPage> {
   late GoogleMapController mapController;
   late final Set<Marker> markers = {};
   geo.Placemark? placemark;
-  final dicodingOffice = const LatLng(-6.8957473, 107.6337669);
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +39,10 @@ class _StoryDetailPageState extends State<StoryDetailPage> {
                 if (story != null) {
                   return _buildPage(story, context);
                 } else {
-                  return const CircularProgressIndicator(
-                    color: Colors.blue,
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.blue,
+                    ),
                   );
                 }
               },
