@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -9,12 +8,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:story_app/provider/home_provider.dart';
 import 'package:story_app/provider/story_provider.dart';
-import 'package:geocoding/geocoding.dart' as geo;
-import 'package:story_app/utils/location_handler.dart';
-import 'package:story_app/utils/placemark_widget.dart';
 
 class AddStoryPage extends StatefulWidget {
-  const AddStoryPage({super.key});
+  final LatLng inputLang;
+
+  const AddStoryPage({super.key, this.inputLang = const LatLng(0.0, 0.0)});
 
   @override
   State<AddStoryPage> createState() => _AddStoryPageState();
@@ -23,11 +21,6 @@ class AddStoryPage extends StatefulWidget {
 class _AddStoryPageState extends State<AddStoryPage> {
   final TextEditingController descriptionController = TextEditingController();
   final formKey = GlobalKey<FormState>();
-  final LocationHandler _locationHandler = LocationHandler();
-
-  LatLng inputLang = const LatLng(0.0, 0.0);
-  geo.Placemark? placemark;
-  bool isLoadingLocation = false;
 
   @override
   void dispose() {
@@ -52,11 +45,6 @@ class _AddStoryPageState extends State<AddStoryPage> {
               _buildImageButtons(),
               _buildDescriptionTextField(),
               _buildInputLocationButton(),
-              const SizedBox(height: 12),
-              if (placemark == null)
-                const SizedBox()
-              else
-                PlacemarkWidget(placemark: placemark!),
               _buildUploadButton(),
             ],
           ),
@@ -140,29 +128,23 @@ class _AddStoryPageState extends State<AddStoryPage> {
     return Padding(
       padding: const EdgeInsets.only(top: 16.0),
       child: ElevatedButton(
-        onPressed: _onMyLocationButtonPress,
+        onPressed: () {
+          context.goNamed('picker');
+        },
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.all(16.0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
         ),
-        child: isLoadingLocation
-            ? const SizedBox(
-                width: 24.0,
-                height: 24.0,
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
-            : const Text(
-                "Input Location",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+        child: const Text(
+          "Input Location",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }
@@ -175,6 +157,7 @@ class _AddStoryPageState extends State<AddStoryPage> {
       child: ElevatedButton(
         onPressed: isUploading ? null : _onUpload,
         style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.greenAccent,
           padding: const EdgeInsets.all(16.0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
@@ -200,40 +183,6 @@ class _AddStoryPageState extends State<AddStoryPage> {
     );
   }
 
-  void _onMyLocationButtonPress() async {
-    setState(() {
-      isLoadingLocation = true;
-    });
-
-    try {
-      final LatLng? latLng = await _locationHandler.getCurrentLocation();
-
-      if (latLng != null) {
-        final geo.Placemark? place = await _locationHandler.getPlacemark(
-            latLng.latitude, latLng.longitude);
-
-        setState(() {
-          inputLang = latLng;
-          placemark = place;
-        });
-      }
-    } catch (e) {
-      log("Error getting location: $e");
-
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Error getting location!"),
-        ),
-      );
-      // Handle error if needed
-    } finally {
-      setState(() {
-        isLoadingLocation = false;
-      });
-    }
-  }
-
   _onUpload() async {
     final ScaffoldMessengerState scaffoldMessengerState =
         ScaffoldMessenger.of(context);
@@ -256,8 +205,8 @@ class _AddStoryPageState extends State<AddStoryPage> {
       descriptionController.text.isNotEmpty
           ? descriptionController.text
           : 'No Description',
-      lat: inputLang.latitude,
-      lon: inputLang.longitude,
+      lat: widget.inputLang.latitude,
+      lon: widget.inputLang.longitude,
     );
 
     if (uploadProvider.uploadResponse != null) {
