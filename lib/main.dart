@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:story_app/data/api/api_service.dart';
 import 'package:story_app/data/db/auth_repository.dart';
@@ -8,6 +9,7 @@ import 'package:story_app/provider/auth_provider.dart';
 import 'package:story_app/provider/home_provider.dart';
 import 'package:story_app/provider/story_provider.dart';
 import 'package:story_app/screen/add_story_page.dart';
+import 'package:story_app/screen/picker_screen.dart';
 import 'package:story_app/screen/splash_screen.dart';
 import 'package:story_app/screen/story_detail_page.dart';
 import 'package:story_app/screen/home_page.dart';
@@ -98,10 +100,27 @@ class _MainAppState extends State<MainApp> {
                               return StoryDetailPage(storyId: storyId);
                             }),
                         GoRoute(
-                          path: 'add',
-                          name: 'add',
-                          builder: (context, state) => const AddStoryPage(),
-                        )
+                            path: 'add',
+                            name: 'add',
+                            builder: (context, state) {
+                              Object? object = state.extra;
+                              if (object != null && object is LatLng) {
+                                return AddStoryPage(
+                                  inputLang: object,
+                                );
+                              } else {
+                                return const AddStoryPage();
+                              }
+                            },
+                            routes: [
+                              GoRoute(
+                                path: 'picker',
+                                name: 'picker',
+                                builder: (context, state) {
+                                  return const PickerScreen();
+                                },
+                              )
+                            ])
                       ]),
                 ],
                 redirect: (context, state) {
